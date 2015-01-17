@@ -67,8 +67,32 @@ public class PerformanceTest {
   private String password;
 
   public static void main(String[] args) {
-    Option helpOption = new Option(OPTION_HELP, "help", false, "shows this help.");
-    cliOptions.addOption(helpOption);
+    addOptions();
+
+    try {
+      final CommandLine cmdLine = cliParser.parse(cliOptions, args);
+
+      if (cmdLine.hasOption(OPTION_HELP)) {
+        printHelp();
+        return;
+      }
+
+      final boolean durationInMillis = cmdLine.hasOption(OPTION_MILLIS);
+      final boolean showColor = !cmdLine.hasOption(OPTION_COLOR);
+      final boolean printHash = cmdLine.hasOption(OPTION_PRINT_HASH) && cmdLine.hasOption(OPTION_STRING);
+
+      final String password = cmdLine.getOptionValue(OPTION_STRING, DEFAULT_PASSWORD);
+      new PerformanceTest(password, durationInMillis, printHash, showColor);
+    } catch (ParseException e) {
+      printHelp();
+      System.out.println(String.format("%sParsing error: %s%s", ANSI_RED, e.getMessage(), ANSI_RESET));
+    } catch (IOException e) {
+      System.out.println(String.format("%sIO-Exception: %s%s", ANSI_RED, e.getMessage(), ANSI_RESET));
+    }
+  }
+
+  private static void addOptions() {
+    final Option helpOption = new Option(OPTION_HELP, "help", false, "shows this help.");
 
     final Option passwordOption = new Option(OPTION_STRING, "string", true,
         "sets the string used for the hash-function" +
@@ -84,31 +108,11 @@ public class PerformanceTest {
     final Option colorOption = new Option(OPTION_COLOR, "color", false,
         "disables colorized output (optional, default: enabled)");
 
-    cliOptions.addOption(colorOption);
-    cliOptions.addOption(printHashOption);
-    cliOptions.addOption(millisOption);
+    cliOptions.addOption(helpOption);
     cliOptions.addOption(passwordOption);
-
-    try {
-      final CommandLine cmdLine = cliParser.parse(cliOptions, args);
-
-      if (cmdLine.hasOption(OPTION_HELP)) {
-        printHelp();
-        return;
-      }
-
-      final boolean durationInMillis = cmdLine.hasOption(OPTION_MILLIS);
-      final boolean showColor = !cmdLine.hasOption(OPTION_COLOR);
-      final boolean printHash = cmdLine.hasOption(OPTION_PRINT_HASH) && cmdLine.hasOption(OPTION_STRING);
-
-      final String string = cmdLine.getOptionValue(OPTION_STRING, DEFAULT_PASSWORD);
-      new PerformanceTest(string, durationInMillis, printHash, showColor);
-    } catch (ParseException e) {
-      printHelp();
-      System.out.println(String.format("%sParsing error: %s%s", ANSI_RED, e.getMessage(), ANSI_RESET));
-    } catch (IOException e) {
-      System.out.println(String.format("%sIO-Exception: %s%s", ANSI_RED, e.getMessage(), ANSI_RESET));
-    }
+    cliOptions.addOption(millisOption);
+    cliOptions.addOption(printHashOption);
+    cliOptions.addOption(colorOption);
   }
 
   private static void printHelp() {
@@ -233,11 +237,10 @@ public class PerformanceTest {
   }
 
   private void hashPassword(PrintWriter out, int rounds) {
-    final Instant start = Instant.now();
     final String hash;
+    final Instant start = Instant.now();
     try {
       hash = BCrypt.hashpw(password, BCrypt.gensalt(rounds));
-
       final Instant end = Instant.now();
 
       final Duration duration = Duration.between(start, end);
@@ -246,6 +249,7 @@ public class PerformanceTest {
       if (printHash) {
         out.println(String.format("Hash: %s%s%s", colorHash, hash, colorReset));
       }
+
       out.println(String.format("Duration: %s%s%s (2^%d rounds)", colorDuration, durationFormatted, colorReset, rounds));
       out.flush();
     } catch (Exception e) {
