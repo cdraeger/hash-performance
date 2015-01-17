@@ -1,0 +1,30 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+version = '1.0.1'
+
+// create a jar-file with all dependencies
+task fatJar(type: Jar) {
+    manifest {
+        attributes(
+            'Main-Class': 'io.draeger.bcrypt.PerformanceTest',
+            'Implementation-Title': 'bcrypt - Performance Testing Tool',
+            'Implementation-Version': version
+        )
+    }
+    baseName = project.name + '-all'
+    // destinationDir file('release')
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'commons-cli:commons-cli:1.2'
+    compile 'org.mindrot:jbcrypt:0.3m'
+    compile 'jline:jline:2.12'
+}
