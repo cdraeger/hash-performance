@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-version = '1.0.3'
+version = '1.0.5'
 
 // create a jar-file with all dependencies
 task fatJar(type: Jar) {
@@ -24,7 +24,9 @@ repositories {
 }
 
 dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'commons-cli:commons-cli:1.2'
-    compile 'org.mindrot:jbcrypt:0.3m'
+    /* currently in libs directory because due to the 0.4 release is not yet available via repository
+    compile 'org.mindrot:jbcrypt:0.3m' */
     compile 'jline:jline:2.12'
 }
