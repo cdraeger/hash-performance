@@ -59,6 +59,7 @@ public class PerformanceTest {
   private final String colorSuccess;
 
   private final String colorInfo;
+  private final String colorInfo2;
   private final String colorWarning;
   private final String colorError;
   private final String colorHash;
@@ -130,6 +131,7 @@ public class PerformanceTest {
 
     colorSuccess = this.showColor ? ANSI_GREEN : "";
     colorInfo = this.showColor ? ANSI_YELLOW : "";
+    colorInfo2 = this.showColor ? ANSI_MAGENTA : "";
     colorWarning = this.showColor ? ANSI_RED : "";
     colorError = this.showColor ? ANSI_RED : "";
     colorHash = this.showColor ? ANSI_YELLOW : "";
@@ -137,7 +139,6 @@ public class PerformanceTest {
     colorReset = this.showColor ? ANSI_RESET : "";
 
     final String ansiDescription = this.showColor ? ANSI_BOLD : "";
-    final String colorInfo = this.showColor ? ANSI_MAGENTA : "";
 
     final String title = String.format("%s<<< Hash Performance Testing Tool (bcrypt) >>>%s", ANSI_BOLD, ANSI_RESET);
 
@@ -176,7 +177,7 @@ public class PerformanceTest {
             "\n - '%s' to change the string used for hashing," +
             "\n - '%s' to clear the screen." +
             "%s\n",
-        colorInfo,
+        colorInfo2,
         cliHelpOptionInfo,
         includeCommandLineHelpOptionInfo ? " (at runtime)" : "",
         OPTION_QUIT[0], OPTION_QUIT[1], OPTION_QUIT[2],
@@ -238,13 +239,13 @@ public class PerformanceTest {
       } else if (line.equalsIgnoreCase(OPTION_MILLIS[0]) || line.equalsIgnoreCase(OPTION_MILLIS[1])) {
         durationInMillis = !durationInMillis;
         final String message = String.format(
-            "%sDuration output changed to %s%s", colorInfo, durationInMillis ? "milliseconds" : "ISO-8601", colorReset);
+            "%sDuration output changed to %s%s", colorSuccess, durationInMillis ? "milliseconds" : "ISO-8601", colorReset);
         out.println(message);
         out.flush();
       } else if (line.equalsIgnoreCase(OPTION_PRINT_HASH[0]) || line.equalsIgnoreCase(OPTION_PRINT_HASH[1])) {
         printHash = !printHash;
         final String message = String.format(
-            "%sPrinting of the resulting hash %s%s", colorInfo, printHash ? "activated" : "deactivated", colorReset);
+            "%sPrinting of the resulting hash %s%s", colorSuccess, printHash ? "activated" : "deactivated", colorReset);
         out.println(message);
         out.flush();
       } else if (line.equalsIgnoreCase(OPTION_CLEAR_SCREEN)) {
