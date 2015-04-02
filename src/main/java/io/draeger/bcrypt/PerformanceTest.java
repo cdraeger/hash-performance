@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 
 /**
  * Command-line application for testing the hardware-dependent performance of the bcrypt hash-algorithm.
@@ -35,15 +36,17 @@ public class PerformanceTest {
 
   private static final String DEFAULT_PASSWORD = "j77*h&DEDYpLpZs3";
 
-  private static final String OPTION_HELP = "h";
+  private static final String[] OPTION_HELP = new String[] {"h", "help"};
 
-  private static final String OPTION_STRING = "s";
-  private static final String OPTION_MILLIS = "m";
-  private static final String OPTION_PRINT_HASH = "p";
-  private static final String OPTION_COLOR = "c";
+  private static final String[] OPTION_STRING = new String[] {"s", "string"};
+  private static final String[] OPTION_MILLIS = new String[] {"m", "millis"};
+  private static final String[] OPTION_PRINT_HASH = new String[] {"p", "print"};
+  private static final String[] OPTION_COLOR = new String[] {"c", "color"};
+
+  private static final String[] OPTION_QUIT = new String[] {"q", "quit", "exit"};
+  private static final String OPTION_CLEAR_SCREEN = "cls";
 
   private static final Character MASK_CHAR = '\0';
-  private static final String MASK_TRIGGER = OPTION_STRING;
 
   private static final Options cliOptions = new Options();
   private static final CommandLineParser cliParser = new BasicParser();
@@ -51,11 +54,9 @@ public class PerformanceTest {
 
   private final ConsoleReader reader;
 
-  final boolean durationInMillis;
-  final boolean printHash;
   final boolean showColor;
-
   private final String colorSuccess;
+
   private final String colorInfo;
   private final String colorWarning;
   private final String colorError;
@@ -64,6 +65,8 @@ public class PerformanceTest {
   private final String colorReset;
   private final String colorPrompt;
 
+  private boolean durationInMillis;
+  private boolean printHash;
   private String password;
 
   public static void main(String[] args) {
@@ -72,16 +75,16 @@ public class PerformanceTest {
     try {
       final CommandLine cmdLine = cliParser.parse(cliOptions, args);
 
-      if (cmdLine.hasOption(OPTION_HELP)) {
+      if (cmdLine.hasOption(OPTION_HELP[0])) {
         printHelp();
         return;
       }
 
-      final boolean durationInMillis = cmdLine.hasOption(OPTION_MILLIS);
-      final boolean showColor = !cmdLine.hasOption(OPTION_COLOR);
-      final boolean printHash = cmdLine.hasOption(OPTION_PRINT_HASH) && cmdLine.hasOption(OPTION_STRING);
+      final boolean durationInMillis = cmdLine.hasOption(OPTION_MILLIS[0]);
+      final boolean showColor = !cmdLine.hasOption(OPTION_COLOR[0]);
+      final boolean printHash = cmdLine.hasOption(OPTION_PRINT_HASH[0]);
+      final String password = cmdLine.getOptionValue(OPTION_STRING[0], DEFAULT_PASSWORD);
 
-      final String password = cmdLine.getOptionValue(OPTION_STRING, DEFAULT_PASSWORD);
       new PerformanceTest(password, durationInMillis, printHash, showColor);
     } catch (ParseException e) {
       printHelp();
@@ -92,20 +95,19 @@ public class PerformanceTest {
   }
 
   private static void addOptions() {
-    final Option helpOption = new Option(OPTION_HELP, "help", false, "shows this help.");
+    final Option helpOption = new Option(OPTION_HELP[0], OPTION_HELP[1], false, "shows this help.");
 
-    final Option passwordOption = new Option(OPTION_STRING, "string", true,
+    final Option passwordOption = new Option(OPTION_STRING[0], OPTION_STRING[1], true,
         "sets the string used for the hash-function" +
             " (optional, by default a hardcoded random 16-character string will be used).");
 
-    final Option millisOption = new Option(OPTION_MILLIS, "millis", false,
+    final Option millisOption = new Option(OPTION_MILLIS[0], OPTION_MILLIS[1], false,
         "enables output in milliseconds (optional, default: ISO-8601).");
 
-    final Option printHashOption = new Option(OPTION_PRINT_HASH, "print", false,
-        "enables printing of the resulting hash to the console (optional, default: disabled). The hash will" +
-            " only be displayed if you also specified a custom string via the '" + OPTION_STRING + "'-option.");
+    final Option printHashOption = new Option(OPTION_PRINT_HASH[0], OPTION_PRINT_HASH[1], false,
+        "enables printing of the resulting hash to the console (optional, default: disabled).");
 
-    final Option colorOption = new Option(OPTION_COLOR, "color", false,
+    final Option colorOption = new Option(OPTION_COLOR[0], OPTION_COLOR[1], false,
         "disables colorized output (optional, default: enabled)");
 
     cliOptions.addOption(helpOption);
@@ -144,19 +146,11 @@ public class PerformanceTest {
             "\nthe hashing increases exponentially (2^x).%s",
             ansiDescription, colorReset);
 
-    final String info = String.format(
-        "\n%sUse the '-h','--help' command-line option for information about optional parameters.\n\n" +
-            "Type\n - 'q', 'quit' or 'exit' to leave this application, " +
-            "\n - 'h' or 'help' to show the help at runtime," +
-            "\n - '" + OPTION_STRING + "' to dynamically change the string used for hashing at runtime," +
-            "\n - 'cls' to clear the screen." +
-            "%s\n",
-        colorInfo, colorReset);
-
 
     System.out.println(title);
     System.out.println(description);
-    System.out.println(info);
+
+    printRuntimeHelp(true);
 
     this.reader = new ConsoleReader();
 
@@ -164,6 +158,34 @@ public class PerformanceTest {
     resetPrompt();
 
     processInput();
+  }
+
+  private void printRuntimeHelp(boolean includeCommandLineHelpOptionInfo) {
+    final String cliHelpOptionInfo = includeCommandLineHelpOptionInfo ?
+        String.format("Use the '-%s','--%s' command-line option for information about optional parameters.\n\n",
+        OPTION_HELP[0], OPTION_HELP[1])
+        : "";
+
+    final String info = String.format(
+        "\n%s%s" +
+            "Type%s\n - '%s', '%s' or '%s' to leave this application, " +
+            "\n - '%s' or '%s' to show this help for parameters at runtime," +
+            "\n - '%s' to switch between duration output in milliseconds or ISO-8601 representation," +
+            "\n - '%s' to enable or disable printing of the resulting hash to the console," +
+            "\n - '%s' to change the string used for hashing," +
+            "\n - '%s' to clear the screen." +
+            "%s\n",
+        colorInfo,
+        cliHelpOptionInfo,
+        includeCommandLineHelpOptionInfo ? " (at runtime)" : "",
+        OPTION_QUIT[0], OPTION_QUIT[1], OPTION_QUIT[2],
+        OPTION_HELP[0], OPTION_HELP[1],
+        OPTION_MILLIS[0],
+        OPTION_PRINT_HASH[0],
+        OPTION_STRING[0],
+        OPTION_CLEAR_SCREEN,
+        colorReset);
+    System.out.println(info);
   }
 
   private void resetPrompt() {
@@ -178,12 +200,13 @@ public class PerformanceTest {
     String line;
     PrintWriter out = new PrintWriter(reader.getOutput());
     while ((line = reader.readLine()) != null) {
-      if (line.equalsIgnoreCase("q") || line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit")) {
+      if (Arrays.asList(OPTION_QUIT).contains(line)) {
         break;
       }
 
-      // typing the trigger word will mask the next line and set the input as the new string to be hashed
-      if (line.equalsIgnoreCase(MASK_TRIGGER)) {
+      // typing the 'string'-option will mask the next line (for entering
+      // a password). The input will be used as the string to be hashed
+      if (line.equalsIgnoreCase(OPTION_STRING[0])) {
         final String info = String.format(
             "%sPlease enter the new password to be used for the hash-function (input is masked)." +
                 "\nNo input will reset to the default string.%s",
@@ -209,9 +232,21 @@ public class PerformanceTest {
         out.flush();
 
         resetPrompt();
-      } else if (line.equalsIgnoreCase("h") || line.equalsIgnoreCase("help")) {
-        printHelp();
-      } else if (line.equalsIgnoreCase("cls")) {
+      } else if (line.equalsIgnoreCase(OPTION_HELP[0]) || line.equalsIgnoreCase(OPTION_HELP[1])) {
+          printRuntimeHelp(false); // runtime help makes more sense at this point than help for command-line options
+      } else if (line.equalsIgnoreCase(OPTION_MILLIS[0]) || line.equalsIgnoreCase(OPTION_MILLIS[1])) {
+        durationInMillis = !durationInMillis;
+        final String message = String.format(
+            "%sDuration output changed to %s%s", colorInfo, durationInMillis ? "milliseconds" : "ISO-8601", colorReset);
+        out.println(message);
+        out.flush();
+      } else if (line.equalsIgnoreCase(OPTION_PRINT_HASH[0]) || line.equalsIgnoreCase(OPTION_PRINT_HASH[1])) {
+        printHash = !printHash;
+        final String message = String.format(
+            "%sPrinting of the resulting hash %s%s", colorInfo, printHash ? "activated" : "deactivated", colorReset);
+        out.println(message);
+        out.flush();
+      } else if (line.equalsIgnoreCase(OPTION_CLEAR_SCREEN)) {
         reader.clearScreen();
       } else { /* Expecting number of rounds here */
         try {
