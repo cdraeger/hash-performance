@@ -139,7 +139,7 @@ public class PerformanceTest {
     final String ansiDescription = this.showColor ? ANSI_BOLD : "";
     final String colorInfo = this.showColor ? ANSI_MAGENTA : "";
 
-    final String title = String.format("%s<<< bcrypt - Performance Testing Tool >>>%s", ANSI_BOLD, ANSI_RESET);
+    final String title = String.format("%s<<< Hash Performance Testing Tool (bcrypt) >>>%s", ANSI_BOLD, ANSI_RESET);
 
     final String description = String.format(
         "\n%sPlease enter the log2 of the number of rounds of hashing to apply. Start with" +
