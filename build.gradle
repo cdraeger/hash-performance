@@ -8,8 +8,8 @@ version = '1.0.1'
 task fatJar(type: Jar) {
     manifest {
         attributes(
-            'Main-Class': 'io.draeger.bcrypt.PerformanceTest',
-            'Implementation-Title': 'bcrypt - Performance Testing Tool',
+            'Main-Class': 'io.draeger.hash.PerformanceTest',
+            'Implementation-Title': 'Hash Performance Testing Tool',
             'Implementation-Version': version
         )
     }

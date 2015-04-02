@@ -1,4 +1,4 @@
-package io.draeger.bcrypt;
+package io.draeger.hash;
 
 import jline.console.ConsoleReader;
 import org.apache.commons.cli.*;
@@ -11,7 +11,8 @@ import java.time.Instant;
 import java.util.Arrays;
 
 /**
- * Command-line application for testing the hardware-dependent performance of the bcrypt hash-algorithm.
+ * Command-line application for testing the hardware-dependent performance of an hash-algorithm (currently
+ * only bcrypt is supported, this might change in the future).
  * <p>
  * It takes the user-input as the log2 of the number of rounds of hashing to apply, and displays the total
  * time consumed by the hash-function afterwards. The work factor and therefore the duration of the hashing
@@ -54,7 +55,7 @@ public class PerformanceTest {
 
   private final ConsoleReader reader;
 
-  final boolean showColor;
+  private final boolean showColor;
   private final String colorSuccess;
 
   private final String colorInfo;
