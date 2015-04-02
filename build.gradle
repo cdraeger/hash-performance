@@ -26,7 +26,7 @@ repositories {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'commons-cli:commons-cli:1.2'
-    /* currently in libs directory because due to the 0.4 release is not yet available via repository
+    /* currently in libs directory because the 0.4 release is not yet available via repository
     compile 'org.mindrot:jbcrypt:0.3m' */
     compile 'jline:jline:2.12'
 }
