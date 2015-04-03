@@ -20,13 +20,13 @@ Start the application with
 
 `-h, --help` to see possible parameters (all optional):
 
-Option               | Description
--------------------- | --------------------
-`-c, --color`        | _disables_ colorized output
-`-h, --help`         | shows this help.
-`-m, --millis`       | _enables_ output in milliseconds (default: ISO-8601)
-`-p, --print`        | enables printing of the resulting hash to the console
-`-s, --string` <arg> | sets the string used for the hash-function (by default a hardcoded random 16-character string will be used)
+Option                | Description
+--------------------- | ------------------------------------------------------
+`-c, --color`         | _disables_ colorized output
+`-h, --help`          | shows this help.
+`-m, --millis`        | _enables_ output in milliseconds (default: ISO-8601)
+`-p, --print`         | enables printing of the resulting hash to the console
+`-s, --string` <arg>  | sets the string used for the hash-function
 
 ##Description
 
