@@ -2,12 +2,13 @@ package io.draeger.hash;
 
 import jline.console.ConsoleReader;
 import org.apache.commons.cli.*;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
+import org.joda.time.Interval;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Arrays;
 
 /**
@@ -23,35 +24,35 @@ import java.util.Arrays;
  */
 public class PerformanceTest {
 
-  public static final String ANSI_RESET = "\u001B[0m";
-  public static final String ANSI_BLACK = "\u001B[30m";
-  public static final String ANSI_RED = "\u001B[31m";
-  public static final String ANSI_GREEN = "\u001B[32m";
-  public static final String ANSI_YELLOW = "\u001B[33m";
-  public static final String ANSI_BLUE = "\u001B[34m";
-  public static final String ANSI_MAGENTA = "\u001B[35m";
-  public static final String ANSI_CYAN = "\u001B[36m";
-  public static final String ANSI_WHITE = "\u001B[37m";
+  static final String ANSI_RESET = "\u001B[0m";
+  static final String ANSI_BLACK = "\u001B[30m";
+  static final String ANSI_RED = "\u001B[31m";
+  static final String ANSI_GREEN = "\u001B[32m";
+  static final String ANSI_YELLOW = "\u001B[33m";
+  static final String ANSI_BLUE = "\u001B[34m";
+  static final String ANSI_MAGENTA = "\u001B[35m";
+  static final String ANSI_CYAN = "\u001B[36m";
+  static final String ANSI_WHITE = "\u001B[37m";
 
-  public static final String ANSI_BOLD = "\u001B[1m";
+  static final String ANSI_BOLD = "\u001B[1m";
 
-  private static final String DEFAULT_PASSWORD = "j77*h&DEDYpLpZs3";
+  static final String DEFAULT_PASSWORD = "j77*h&DEDYpLpZs3";
 
-  private static final String[] OPTION_HELP = new String[] {"h", "help"};
+  static final String[] OPTION_HELP = new String[] {"h", "help"};
 
-  private static final String[] OPTION_STRING = new String[] {"s", "string"};
-  private static final String[] OPTION_MILLIS = new String[] {"m", "millis"};
-  private static final String[] OPTION_PRINT_HASH = new String[] {"p", "print"};
-  private static final String[] OPTION_COLOR = new String[] {"c", "color"};
+  static final String[] OPTION_STRING = new String[] {"s", "string"};
+  static final String[] OPTION_MILLIS = new String[] {"m", "millis"};
+  static final String[] OPTION_PRINT_HASH = new String[] {"p", "print"};
+  static final String[] OPTION_COLOR = new String[] {"c", "color"};
 
-  private static final String[] OPTION_QUIT = new String[] {"q", "quit", "exit"};
-  private static final String OPTION_CLEAR_SCREEN = "cls";
+  static final String[] OPTION_QUIT = new String[] {"q", "quit", "exit"};
+  static final String OPTION_CLEAR_SCREEN = "cls";
 
-  private static final Character MASK_CHAR = '\0';
+  static final Character MASK_CHAR = '\0';
 
-  private static final Options cliOptions = new Options();
-  private static final CommandLineParser cliParser = new BasicParser();
-  private static final HelpFormatter cliHelpFormatter = new HelpFormatter();
+  static final Options cliOptions = new Options();
+  static final CommandLineParser cliParser = new BasicParser();
+  static final HelpFormatter cliHelpFormatter = new HelpFormatter();
 
   private final ConsoleReader reader;
 
@@ -120,7 +121,7 @@ public class PerformanceTest {
   }
 
   private static void printHelp() {
-    cliHelpFormatter.printHelp(PerformanceTest.class.getPackage().getName() + "-performance", cliOptions);
+    cliHelpFormatter.printHelp("java -jar hash-performance.jar [options]", cliOptions);
   }
 
   public PerformanceTest(String password, boolean durationInMillis, boolean printHash, boolean showColor) throws IOException {
@@ -239,7 +240,7 @@ public class PerformanceTest {
       } else if (line.equalsIgnoreCase(OPTION_MILLIS[0]) || line.equalsIgnoreCase(OPTION_MILLIS[1])) {
         durationInMillis = !durationInMillis;
         final String message = String.format(
-            "%sDuration output changed to %s%s", colorSuccess, durationInMillis ? "milliseconds" : "ISO-8601", colorReset);
+            "%sDuration output format changed to %s%s", colorSuccess, durationInMillis ? "milliseconds" : "ISO-8601", colorReset);
         out.println(message);
         out.flush();
       } else if (line.equalsIgnoreCase(OPTION_PRINT_HASH[0]) || line.equalsIgnoreCase(OPTION_PRINT_HASH[1])) {
@@ -250,7 +251,7 @@ public class PerformanceTest {
         out.flush();
       } else if (line.equalsIgnoreCase(OPTION_CLEAR_SCREEN)) {
         reader.clearScreen();
-      } else { /* Expecting number of rounds here */
+      } else { // expecting number of rounds here
         try {
           final int rounds = Integer.parseInt(line);
           if (rounds < minRounds || rounds > maxRounds) {
@@ -273,25 +274,35 @@ public class PerformanceTest {
     }
   }
 
+  /**
+   * To maintain Java 1.6/1.7 backwards compatibility, Joda Time is used. This
+   * adds overhead and significantly increases the file size, but spared me manual
+   * ISO 8601 formatting while not limiting compatibility to Java 1.8 and above.
+   *
+   * If only millisecond display is required, {@link System#currentTimeMillis()}
+   * would suffice of course. If Java 8 support only is fine, use
+   * - java.time.Instant.now()
+   * - java.time.Duration.between(start, end)
+   */
   private void hashPassword(PrintWriter out, int rounds) {
-    final String hash;
-    final Instant start = Instant.now();
     try {
-      hash = BCrypt.hashpw(password, BCrypt.gensalt(rounds));
-      final Instant end = Instant.now();
+      final Instant startJT = Instant.now();
 
-      final Duration duration = Duration.between(start, end);
-      final String durationFormatted = durationInMillis ? duration.toMillis() + "ms" : duration.toString();
+      // start hashing
+      final String hash = BCrypt.hashpw(password, BCrypt.gensalt(rounds));
+      final Instant endJT = Instant.now();
+      final Interval interval = new Interval(startJT, endJT);
+      final Duration duration = interval.toDuration();
 
       if (printHash) {
         out.println(String.format("Hash: %s%s%s", colorHash, hash, colorReset));
       }
 
+      final String durationFormatted = durationInMillis ? duration.getMillis() + "ms" : duration.toString();
       out.println(String.format("Duration: %s%s%s (2^%d rounds)", colorDuration, durationFormatted, colorReset, rounds));
       out.flush();
     } catch (Exception e) {
       System.out.println(String.format("%sError: %s%s", colorError, e.getMessage(), colorReset));
     }
-
   }
 }
