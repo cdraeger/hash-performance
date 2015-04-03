@@ -10,12 +10,13 @@ _Currently only **bcrypt** is supported (via the [jBCrypt](http://www.mindrot.or
 
 [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/index.html) (1.6 or greater)
 
-
 ##Usage
+
+[Download the packaged JAR file](https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.6.jar?raw=true)
 
 Start the application with
 
-**`java -jar hash-performance.jar [options]`**
+**`java -jar hash-performance-all-1.0.6.jar [options]`**
 
 `-h, --help` to see possible parameters (all optional):
 
