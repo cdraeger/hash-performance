@@ -12,13 +12,15 @@ _Currently only **bcrypt** is supported (via the [jBCrypt](http://www.mindrot.or
 
 ##Usage
 
-[Download the packaged JAR file](https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.6.jar?raw=true)
+[Download the packaged JAR file](https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.6.jar?raw=true), alternatively directly on your server:
 
-Start the application with
+`wget https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.6.jar?raw=true`
+
+Start the application:
 
 **`java -jar hash-performance-all-1.0.6.jar [options]`**
 
-`-h, --help` to see possible parameters (all optional):
+Add `-h, --help` to see possible parameters first (all optional):
 
 Option                | Description
 --------------------- | ------------------------------------------------------
@@ -30,7 +32,7 @@ Option                | Description
 
 ##Description
 
-This tool takes the user-input as the log2 of the number of rounds of hashing to apply, and displays the _total time consumed by the hash-function_. The accuracy of the duration is not perfect, but it should suffice for the intended purpose.
+This tool takes the user-input as the log2 of the number of rounds of hashing to apply, and displays the _total time consumed by the hash-function_. The precision of the duration is not perfect, but it should suffice for the intended purpose.
 
 The work factor and therefore the duration of the hashing with bcrypt increases exponentially (2^x), which is why the time consumed by hashing passwords is important to know for properly __balancing server-load, response-times and security__.
 
