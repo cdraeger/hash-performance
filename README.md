@@ -12,7 +12,7 @@ _Currently only **bcrypt** is supported (via the [jBCrypt](http://www.mindrot.or
 
 ##Usage
 
-[Download the packaged JAR file](https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.6.jar?raw=true), alternatively directly on your server:
+[Download the packaged JAR file](https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.6.jar?raw=true), you will probably want to do that directly on your server:
 
 `wget https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.6.jar?raw=true`
 
