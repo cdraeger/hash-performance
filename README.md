@@ -16,9 +16,7 @@ _Currently only **bcrypt** is supported (via the [jBCrypt](http://www.mindrot.or
 
 `wget https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.6.jar?raw=true`
 
-Start the application:
-
-**`java -jar hash-performance-all-1.0.6.jar [options]`**
+Start the application: **`java -jar hash-performance-all-1.0.6.jar [options]`**
 
 Add `-h, --help` to see possible parameters first (all optional):
 
