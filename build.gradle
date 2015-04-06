@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
-version = '1.0.6'
+version = '1.0.7'
 
 // create a jar-file with all dependencies
 task fatJar(type: Jar) {
@@ -27,7 +27,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'commons-cli:commons-cli:1.2'
     compile 'jline:jline:2.12'
+    compile 'com.google.code.findbugs:annotations:3.0.0'
     /* currently in libs directory because the 0.4 release is not yet available via repository
     compile 'org.mindrot:jbcrypt:0.3m' */
-    compile 'joda-time:joda-time:2.7'
 }

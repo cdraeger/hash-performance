@@ -1,10 +1,8 @@
 package io.draeger.hash;
 
+import com.google.common.base.Stopwatch;
 import jline.console.ConsoleReader;
 import org.apache.commons.cli.*;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
-import org.joda.time.Interval;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
@@ -41,12 +39,11 @@ public class PerformanceTest {
   static final String[] OPTION_HELP = new String[] {"h", "help"};
 
   static final String[] OPTION_STRING = new String[] {"s", "string"};
-  static final String[] OPTION_MILLIS = new String[] {"m", "millis"};
   static final String[] OPTION_PRINT_HASH = new String[] {"p", "print"};
   static final String[] OPTION_COLOR = new String[] {"c", "color"};
 
   static final String[] OPTION_QUIT = new String[] {"q", "quit", "exit"};
-  static final String OPTION_CLEAR_SCREEN = "cls";
+  static final String OPTION_CLEAR_SCREEN = "clear";
 
   static final Character MASK_CHAR = '\0';
 
@@ -68,7 +65,6 @@ public class PerformanceTest {
   private final String colorReset;
   private final String colorPrompt;
 
-  private boolean durationInMillis;
   private boolean printHash;
   private String password;
 
@@ -83,12 +79,11 @@ public class PerformanceTest {
         return;
       }
 
-      final boolean durationInMillis = cmdLine.hasOption(OPTION_MILLIS[0]);
       final boolean showColor = !cmdLine.hasOption(OPTION_COLOR[0]);
       final boolean printHash = cmdLine.hasOption(OPTION_PRINT_HASH[0]);
       final String password = cmdLine.getOptionValue(OPTION_STRING[0], DEFAULT_PASSWORD);
 
-      new PerformanceTest(password, durationInMillis, printHash, showColor);
+      new PerformanceTest(password, printHash, showColor);
     } catch (ParseException e) {
       printHelp();
       System.out.println(String.format("%sParsing error: %s%s", ANSI_RED, e.getMessage(), ANSI_RESET));
@@ -104,9 +99,6 @@ public class PerformanceTest {
         "sets the string used for the hash-function" +
             " (optional, by default a hardcoded random 16-character string will be used).");
 
-    final Option millisOption = new Option(OPTION_MILLIS[0], OPTION_MILLIS[1], false,
-        "enables output in milliseconds (optional, default: ISO-8601).");
-
     final Option printHashOption = new Option(OPTION_PRINT_HASH[0], OPTION_PRINT_HASH[1], false,
         "enables printing of the resulting hash to the console (optional, default: disabled).");
 
@@ -115,7 +107,6 @@ public class PerformanceTest {
 
     cliOptions.addOption(helpOption);
     cliOptions.addOption(passwordOption);
-    cliOptions.addOption(millisOption);
     cliOptions.addOption(printHashOption);
     cliOptions.addOption(colorOption);
   }
@@ -124,9 +115,8 @@ public class PerformanceTest {
     cliHelpFormatter.printHelp("java -jar hash-performance.jar [options]", cliOptions);
   }
 
-  public PerformanceTest(String password, boolean durationInMillis, boolean printHash, boolean showColor) throws IOException {
+  public PerformanceTest(String password, boolean printHash, boolean showColor) throws IOException {
     this.password = password;
-    this.durationInMillis = durationInMillis;
     this.printHash = printHash;
     this.showColor = showColor;
 
@@ -173,7 +163,6 @@ public class PerformanceTest {
         "\n%s%s" +
             "Type%s\n - '%s', '%s' or '%s' to leave this application, " +
             "\n - '%s' or '%s' to show this help for parameters at runtime," +
-            "\n - '%s' to switch between duration output in milliseconds or ISO-8601 representation," +
             "\n - '%s' to enable or disable printing of the resulting hash to the console," +
             "\n - '%s' to change the string used for hashing," +
             "\n - '%s' to clear the screen." +
@@ -183,7 +172,6 @@ public class PerformanceTest {
         includeCommandLineHelpOptionInfo ? " (at runtime)" : "",
         OPTION_QUIT[0], OPTION_QUIT[1], OPTION_QUIT[2],
         OPTION_HELP[0], OPTION_HELP[1],
-        OPTION_MILLIS[0],
         OPTION_PRINT_HASH[0],
         OPTION_STRING[0],
         OPTION_CLEAR_SCREEN,
@@ -237,12 +225,6 @@ public class PerformanceTest {
         resetPrompt();
       } else if (line.equalsIgnoreCase(OPTION_HELP[0]) || line.equalsIgnoreCase(OPTION_HELP[1])) {
           printRuntimeHelp(false); // runtime help makes more sense at this point than help for command-line options
-      } else if (line.equalsIgnoreCase(OPTION_MILLIS[0]) || line.equalsIgnoreCase(OPTION_MILLIS[1])) {
-        durationInMillis = !durationInMillis;
-        final String message = String.format(
-            "%sDuration output format changed to %s%s", colorSuccess, durationInMillis ? "milliseconds" : "ISO-8601", colorReset);
-        out.println(message);
-        out.flush();
       } else if (line.equalsIgnoreCase(OPTION_PRINT_HASH[0]) || line.equalsIgnoreCase(OPTION_PRINT_HASH[1])) {
         printHash = !printHash;
         final String message = String.format(
@@ -275,31 +257,31 @@ public class PerformanceTest {
   }
 
   /**
-   * To maintain Java 1.6/1.7 backwards compatibility, Joda Time is used. This
-   * adds overhead and significantly increases the file size, but spared me manual
-   * ISO 8601 formatting while not limiting compatibility to Java 1.8 and above.
+   * To maintain Java 1.6/1.7 backwards compatibility, the {@link Stopwatch}
+   * implementation is used for easy measurement and formatting of the elapsed
+   * time. Since the whole Guava dependency blows up the file size, only the
+   * necessary classes were extracted.
    *
    * If only millisecond display is required, {@link System#currentTimeMillis()}
-   * would suffice of course. If Java 8 support only is fine, use
+   * would suffice of course. If Java 8 support only is fine, new methods like
    * - java.time.Instant.now()
    * - java.time.Duration.between(start, end)
+   * could also be used for ISO 8601 formatting.
    */
   private void hashPassword(PrintWriter out, int rounds) {
     try {
-      final Instant startJT = Instant.now();
+      final Stopwatch stopwatch = Stopwatch.createStarted();
 
       // start hashing
       final String hash = BCrypt.hashpw(password, BCrypt.gensalt(rounds));
-      final Instant endJT = Instant.now();
-      final Interval interval = new Interval(startJT, endJT);
-      final Duration duration = interval.toDuration();
+      stopwatch.stop();
 
       if (printHash) {
         out.println(String.format("Hash: %s%s%s", colorHash, hash, colorReset));
       }
 
-      final String durationFormatted = durationInMillis ? duration.getMillis() + "ms" : duration.toString();
-      out.println(String.format("Duration: %s%s%s (2^%d rounds)", colorDuration, durationFormatted, colorReset, rounds));
+      final String elapsedTime = stopwatch.toString();
+      out.println(String.format("Duration: %s%s%s (2^%d rounds)", colorDuration, elapsedTime, colorReset, rounds));
       out.flush();
     } catch (Exception e) {
       System.out.println(String.format("%sError: %s%s", colorError, e.getMessage(), colorReset));

@@ -12,11 +12,11 @@ _Currently only **bcrypt** is supported (via the [jBCrypt](http://www.mindrot.or
 
 ##Usage
 
-[Download the packaged JAR file](https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.6.jar?raw=true), you will probably want to do that directly on your server:
+[Download the packaged JAR file](https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.7.jar?raw=true), you will probably want to do that directly on your server:
 
-`wget https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.6.jar?raw=true`
+`wget https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.7.jar?raw=true`
 
-Start the application: **`java -jar hash-performance-all-1.0.6.jar [options]`**
+Start the application: **`java -jar hash-performance-all-1.0.7.jar [options]`**
 
 Add `-h, --help` to see possible parameters first (all optional):
 
@@ -24,19 +24,22 @@ Option                | Description
 --------------------- | ------------------------------------------------------
 `-c, --color`         | _disables_ colorized output
 `-h, --help`          | shows this help.
-`-m, --millis`        | _enables_ output in milliseconds (default: ISO-8601)
 `-p, --print`         | enables printing of the resulting hash to the console
 `-s, --string` <arg>  | sets the string used for the hash-function
 
 ##Description
 
-This tool takes the user-input as the log2 of the number of rounds of hashing to apply, and displays the _total time consumed by the hash-function_. The precision of the duration is not perfect, but it should suffice for the intended purpose.
+This tool takes the user-input as the log2 of the number of rounds of hashing to apply, and displays the _total time consumed by the hash-function_. The precision of the duration is as good as the platform allows.
 
-The work factor and therefore the duration of the hashing with bcrypt increases exponentially (2^x), which is why the time consumed by hashing passwords is important to know for properly __balancing server-load, response-times and security__.
+The work factor and therefore the duration of the hashing with bcrypt increases exponentially (2^x), which is why the time consumed by hashing passwords is important to know for a proper __balance of server-load, response-times and security__.
 
-_To maintain Java 1.6/1.7 backwards compatibility, the Joda Time library is used. This adds overhead and significantly increases the file size, but spared me manual ISO 8601 formatting while not limiting compatibility to Java 1.8 and above._
+_For easy measurement and formatting of the elapsed time, the Guava [Stopwatch](https://github.com/google/guava/blob/master/guava/src/com/google/common/base/Stopwatch.java) implementation is used. Since the whole Guava dependency blows up the file size, only the necessary classes were extracted._
 
 ##Changelog
+
+**v1.0.7**
+
+* Switched to Guava [Stopwatch](https://github.com/google/guava/blob/master/guava/src/com/google/common/base/Stopwatch.java) implementation for time measurement and display
 
 **v1.0.6**
 
