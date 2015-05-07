@@ -2,7 +2,7 @@
 
 Java command-line interface application for testing the hardware-dependent performance of hash-algorithms.
 
-![demo](http://gfycat.com/FlatAjarInchworm)
+![demo](http://giant.gfycat.com/FlatAjarInchworm.gif)
 
 _Currently only **bcrypt** is supported (via the [jBCrypt](http://www.mindrot.org/projects/jBCrypt/) library), although this might change in future releases._
 
