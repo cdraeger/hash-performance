@@ -14,7 +14,7 @@ _Currently only **bcrypt** is supported (via the [jBCrypt](http://www.mindrot.or
 
 [Download the packaged JAR file](https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.7.jar?raw=true), you will probably want to do that directly on your server:
 
-`wget https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.7.jar?raw=true`
+`wget -O hash-performance-all-1.0.7.jar 'https://github.com/cdraeger/hash-performance/blob/master/release/hash-performance-all-1.0.7.jar?raw=true'`
 
 Start the application: **`java -jar hash-performance-all-1.0.7.jar [options]`**
 
